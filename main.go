@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cpoc/dbcrawler/config"
 	"fmt"
 	"os/exec"
 
@@ -29,4 +30,11 @@ func main() {
 	output, err := cmd.Output()
 
 	fmt.Println(output)
+
+	conf := config.NewConfig("dbcrawler.conf")
+
+	println(conf.Postgres.ExecPath)
+	println(conf.Postgres.ExecQueryPath)
+	println(conf)
+	println("test")
 }

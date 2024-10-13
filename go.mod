@@ -2,7 +2,10 @@ module cpoc/dbcrawler
 
 go 1.23.2
 
-require github.com/shirou/gopsutil/v4 v4.24.9
+require (
+	github.com/BurntSushi/toml v1.4.0
+	github.com/shirou/gopsutil/v4 v4.24.9
+)
 
 require (
 	github.com/ebitengine/purego v0.8.0 // indirect
