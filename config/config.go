@@ -1,10 +1,12 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"os"
 
 	"github.com/BurntSushi/toml"
+	"github.com/mitchellh/mapstructure"
 )
 
 // TOMLExample represents the entire TOML structure.
@@ -13,6 +15,7 @@ import (
 type Database struct {
 	ExecPath      string `toml:"exec_path"`
 	ExecQueryPath string `toml:"query_path"`
+	ExecMccsPath  string `toml:"exec_mccs_path"`
 }
 
 type Config struct {
@@ -20,7 +23,7 @@ type Config struct {
 }
 
 type Postgres struct {
-	Database
+	Database `mapstructure:",squash"`
 }
 
 func NewConfig(filePath string) *Config {
@@ -34,9 +37,17 @@ func NewConfig(filePath string) *Config {
 	}
 	defer file.Close()
 
-	if _, err := toml.NewDecoder(file).Decode(&config); err != nil {
-		return config
-	}
-
+	toml.NewDecoder(file).Decode(&config)
+	println(config.Postgres.ExecPath)
 	return config
+}
+
+func (c *Config) StructToMap() map[string]interface{} {
+	result := make(map[string]interface{})
+
+	err := mapstructure.Decode(c, &result)
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	return result
 }
