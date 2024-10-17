@@ -2,6 +2,7 @@ package trace
 
 import (
 	"cpoc/dbcrawler/config"
+	"fmt"
 	"log"
 	"strings"
 
@@ -14,8 +15,8 @@ const (
 
 type DBProcess struct {
 	name          string
-	Pid           int
-	Ppid          int
+	Pid           int32
+	Ppid          int32
 	Port          int
 	ExecPath      string
 	ExecQueryPath string
@@ -51,8 +52,18 @@ func SearchPidList(config *config.Config) *[]DBProcess {
 
 				if strNoSpace != "" && strings.Contains(exe, strNoSpace) {
 
+					ppid, _ := pid.Ppid()
+					connections, _ := pid.Connections()
+
+					for _, conn := range connections {
+						// conn에 대한 작업 수행
+						fmt.Println("Connection:", conn)
+					}
+
 					dbProcess := DBProcess{
 						name: key,
+						Pid:  pid.Pid,
+						Ppid: ppid,
 					}
 
 					dbList = append(dbList, dbProcess)
