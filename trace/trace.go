@@ -71,8 +71,3 @@ func SearchPidList(config *config.Config) *[]DBProcess {
 	}
 	return &dbList
 }
-
-func FindExactPath(config *config.Config) string {
-
-	return "st"
-}
