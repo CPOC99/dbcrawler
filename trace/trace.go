@@ -3,10 +3,11 @@ package trace
 import (
 	"cpoc/dbcrawler/config"
 	"fmt"
+	"github.com/DataDog/gopsutil/process"
 	"log"
 	"strings"
 
-	"github.com/shirou/gopsutil/process"
+	"github.com/DataDog/gopsutil/net"
 )
 
 const (
@@ -23,13 +24,11 @@ type DBProcess struct {
 	LocalAddr     string
 }
 
-// later needs goroutine
-// if expect slice enough big ... use pointer
 func SearchPidList(config *config.Config) *[]DBProcess {
 
 	var strNoSpace string
 
-	pids, err := process.Processes()
+	pids, err := process.AllProcesses()
 	dbList := make([]DBProcess, 0)
 
 	if err != nil {
@@ -39,10 +38,9 @@ func SearchPidList(config *config.Config) *[]DBProcess {
 	}
 
 	// is possible goroutine ?
-	for _, pid := range pids {
+	for _, filledPid := range pids {
 
-		exe, _ := pid.Exe()
-
+		exe := filledPid.Exe
 		for key, value := range config.StructToMap() {
 
 			//check  key is exist
@@ -50,10 +48,9 @@ func SearchPidList(config *config.Config) *[]DBProcess {
 
 				strNoSpace = strings.ReplaceAll(execPath.(string), " ", "")
 
-				if strNoSpace != "" && strings.Contains(exe, strNoSpace) {
+				if filledPid.Pid == filledPid.Ppid && strNoSpace != "" && strings.Contains(exe, strNoSpace) {
 
-					ppid, _ := pid.Ppid()
-					connections, _ := pid.Connections()
+					connections, _ := net.ConnectionsPid("tcp", filledPid.Pid)
 
 					for _, conn := range connections {
 						// conn에 대한 작업 수행
@@ -62,8 +59,8 @@ func SearchPidList(config *config.Config) *[]DBProcess {
 
 					dbProcess := DBProcess{
 						name: key,
-						Pid:  pid.Pid,
-						Ppid: ppid,
+						Pid:  filledPid.Pid,
+						Ppid: filledPid.Ppid,
 					}
 
 					dbList = append(dbList, dbProcess)
@@ -73,4 +70,9 @@ func SearchPidList(config *config.Config) *[]DBProcess {
 		}
 	}
 	return &dbList
+}
+
+func FindExactPath(config *config.Config) string {
+
+	return "st"
 }
